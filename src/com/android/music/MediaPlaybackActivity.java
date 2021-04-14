@@ -151,6 +151,7 @@ public class MediaPlaybackActivity extends Activity implements MusicUtils.Defs,
             seeker.setOnSeekBarChangeListener(mSeekListener);
         }
         mProgress.setMax(1000);
+	mProgress.requestFocus();
 
         mTouchSlop = ViewConfiguration.get(this).getScaledTouchSlop();
     }

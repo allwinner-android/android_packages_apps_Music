@@ -1167,16 +1167,9 @@ public class MusicUtils {
             v.setOnFocusChangeListener(new View.OnFocusChangeListener() {
 
                 public void onFocusChange(View v, boolean hasFocus) {
-                    if (hasFocus) {
-                        for (int i = 0; i < ll.getTabCount(); i++) {
-                            if (ll.getChildTabViewAt(i) == v) {
-                                ll.setCurrentTab(i);
-                                processTabClick((Activity)ll.getContext(), v, ll.getChildAt(sActiveTabIndex).getId());
-                                break;
-                            }
-                        }
-                    }
-                }});
+		    Log.d(TAG,"onFocusChange ");
+                }
+	    });
             
             v.setOnClickListener(new View.OnClickListener() {
 

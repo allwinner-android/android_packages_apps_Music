@@ -49,6 +49,10 @@ import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.Toast;
 
 import java.io.IOException;
+import java.io.File;
+import android.os.storage.StorageManager;
+import android.os.storage.StorageVolume;
+import android.os.Environment;
 
 /**
  * Dialog that comes up in response to various music-related VIEW intents.
@@ -74,7 +78,7 @@ public class AudioPreview extends Activity implements OnPreparedListener, OnErro
     @Override
     public void onCreate(Bundle icicle) {
         super.onCreate(icicle);
-        
+
         Intent intent = getIntent();
         if (intent == null) {
             finish();
@@ -86,7 +90,7 @@ public class AudioPreview extends Activity implements OnPreparedListener, OnErro
             return;
         }
         String scheme = mUri.getScheme();
-        
+
         setVolumeControlStream(AudioManager.STREAM_MUSIC);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.audiopreview);
@@ -139,7 +143,7 @@ public class AudioPreview extends Activity implements OnPreparedListener, OnErro
                     if (idIdx >=0) {
                         mMediaId = cursor.getLong(idIdx);
                     }
-                    
+
                     if (titleIdx >= 0) {
                         String title = cursor.getString(titleIdx);
                         mTextLine1.setText(title);
@@ -274,7 +278,7 @@ public class AudioPreview extends Activity implements OnPreparedListener, OnErro
         }
         updatePlayPause();
     }
-    
+
     private OnAudioFocusChangeListener mAudioFocusListener = new OnAudioFocusChangeListener() {
         public void onAudioFocusChange(int focusChange) {
             if (mPlayer == null) {
@@ -305,14 +309,14 @@ public class AudioPreview extends Activity implements OnPreparedListener, OnErro
             updatePlayPause();
         }
     };
-    
+
     private void start() {
         mAudioManager.requestAudioFocus(mAudioFocusListener, AudioManager.STREAM_MUSIC,
                 AudioManager.AUDIOFOCUS_GAIN_TRANSIENT);
         mPlayer.start();
         mProgressRefresher.postDelayed(new ProgressRefresher(), 200);
     }
-    
+
     public void setNames() {
         if (TextUtils.isEmpty(mTextLine1.getText())) {
             mTextLine1.setText(mUri.getLastPathSegment());
@@ -337,7 +341,7 @@ public class AudioPreview extends Activity implements OnPreparedListener, OnErro
             }
         }
     }
-    
+
     private void updatePlayPause() {
         ImageButton b = (ImageButton) findViewById(R.id.playpause);
         if (b != null && mPlayer != null) {
@@ -370,7 +374,14 @@ public class AudioPreview extends Activity implements OnPreparedListener, OnErro
     };
 
     public boolean onError(MediaPlayer mp, int what, int extra) {
-        Toast.makeText(this, R.string.playback_failed, Toast.LENGTH_SHORT).show();
+        String path = mUri.getPath();
+        final StorageManager storageManager  = (StorageManager) getSystemService(STORAGE_SERVICE);
+        File mTestFile = new File(path);
+        StorageVolume mVolume = storageManager.getStorageVolume(mTestFile);
+        Log.d(TAG, "volume = " + mVolume + " state = " + mVolume.getState());
+        if(!mVolume.getState().equals(Environment.MEDIA_EJECTING)){
+            Toast.makeText(this, R.string.playback_failed, Toast.LENGTH_SHORT).show();
+        }
         finish();
         return true;
     }
@@ -392,7 +403,7 @@ public class AudioPreview extends Activity implements OnPreparedListener, OnErro
         }
         updatePlayPause();
     }
-    
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         super.onCreateOptionsMenu(menu);
@@ -414,7 +425,7 @@ public class AudioPreview extends Activity implements OnPreparedListener, OnErro
         item.setVisible(false);
         return false;
     }
-    
+
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         switch (keyCode) {
